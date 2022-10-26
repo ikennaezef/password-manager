@@ -1,3 +1,4 @@
+import json
 from random import randint, shuffle, choice
 import tkinter
 from tkinter import messagebox
@@ -35,21 +36,60 @@ def save_password():
     website_value = website_input.get()
     email_value = email_input.get()
     password_value = password_input.get()
+    new_data = {
+        website_value: {
+            "email": email_value,
+            "password": password_value
+        }
+    }
 
-    if len(website_value) == 0 or password_value == 0:
+    if len(website_value) == 0 or len(password_value) == 0 or len(email_value):
         messagebox.showwarning(title="Oops", message="You've left some fields empty!")
     else:
         is_ok = messagebox.askokcancel(title=website_value,
-                                       message=f"These are the details you entered: \nEmail: {email_value}\nPassword: {password_value}\nIs it ok to save?")
+                                       message=f"These are the details you entered: \nEmail: {email_value}\n"
+                                               f"Password: {password_value}\nIs it ok to save?")
 
         if is_ok:
-            with open("data.txt", mode="a") as file:
-                data_to_add = f"{website_value} | {email_value} | {password_value}\n"
-                file.write(data_to_add)
+            try:
+                with open("data.json", mode="r") as file:
+                    data = json.load(file)
+            except FileNotFoundError:
+                with open("data.json", mode="w") as file:
+                    json.dump(new_data, file, indent=4)
+            else:
+                data.update(new_data)
+                with open("data.json", mode="w") as file:
+                    json.dump(data, file, indent=4)
+            finally:
+                save_success()
 
-            website_input.delete(0, tkinter.END)
-            password_input.delete(0, tkinter.END)
-            messagebox.showinfo(title="Success", message="Your details have been added successfully")
+
+def find_password():
+    website_value = website_input.get()
+
+    if len(website_value) == 0:
+        messagebox.showwarning(title="Hey", message="Seems like you forgot to fill the website entry")
+    else:
+        try:
+            with open("data.json", "r") as file:
+                data = json.load(file)
+        except FileNotFoundError:
+            messagebox.showwarning(title="Error", message="Data File not Found!")
+        else:
+            if website_value in data:
+                messagebox.showinfo(title=website_value,
+                                    message=f"Your details for {website_value}:\n"
+                                            f"Email: {data[website_value]['email']}\n"
+                                            f"Password: {data[website_value]['password']}")
+            else:
+                messagebox.showwarning(title="Oops", message="That entry is not saved.")
+
+
+def save_success():
+    website_input.delete(0, tkinter.END)
+    password_input.delete(0, tkinter.END)
+    messagebox.showinfo(title="Success", message="Your details have been added successfully")
 
 
 # ---------------------------- UI SETUP ------------------------------- #
@@ -66,14 +106,17 @@ canvas.grid(row=0, column=1)
 website_label = tkinter.Label(text="Website: ")
 website_label.grid(row=1, column=0)
 
-website_input = tkinter.Entry(width=35)
+website_input = tkinter.Entry(width=21)
 website_input.focus()
-website_input.grid(row=1, column=1, columnspan=2)
+website_input.grid(row=1, column=1)
+
+search_btn = tkinter.Button(text="Search", width=15, command=find_password)
+search_btn.grid(row=1, column=2)
 
 email_label = tkinter.Label(text="Email/Username: ")
 email_label.grid(row=2, column=0)
 
-email_input = tkinter.Entry(width=35)
+email_input = tkinter.Entry(width=45)
 email_input.grid(row=2, column=1, columnspan=2)
 
 password_label = tkinter.Label(text="Password: ")
@@ -85,7 +128,7 @@ password_input.grid(row=3, column=1)
 generate_btn = tkinter.Button(text="Generate Password", command=generate_password, bg=PINK)
 generate_btn.grid(row=3, column=2)
 
-add_btn = tkinter.Button(text="Add", width=36, command=save_password, bg=GREEN)
+add_btn = tkinter.Button(text="Add", width=40, command=save_password, bg=GREEN)
 add_btn.grid(row=4, column=1, columnspan=2)
 
 screen.mainloop()
