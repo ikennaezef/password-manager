@@ -5,10 +5,8 @@ from tkinter import messagebox
 import pyperclip
 
 PINK = "#e2979c"
-RED = "#FF1E1E"
 GREEN = "#54B435"
-TEAL = "#00FFD1"
-ORANGE = "#F77E21"
+BLUE = "#2146C7"
 
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
@@ -110,7 +108,7 @@ website_input = tkinter.Entry(width=21)
 website_input.focus()
 website_input.grid(row=1, column=1)
 
-search_btn = tkinter.Button(text="Search", width=15, command=find_password)
+search_btn = tkinter.Button(text="Search", width=15, command=find_password, bg=BLUE, fg="White")
 search_btn.grid(row=1, column=2)
 
 email_label = tkinter.Label(text="Email/Username: ")
